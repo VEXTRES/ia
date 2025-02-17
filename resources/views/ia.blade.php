@@ -30,7 +30,7 @@
     chatBox.innerHTML += `<div class="text-right text-blue-600 mb-2"><strong>Tú:</strong> ${message}</div>`;
     messageInput.value = '';
 
-    fetch("{{ route('queryIA') }}", {
+    fetch("{{ route('preguntarIA') }}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -38,7 +38,7 @@
             "X-CSRF-TOKEN": token
         },
         body: JSON.stringify({ message: message })
-    })
+     })
     .then(response => {
         console.log('Status:', response.status);  // Debug status
         if (!response.ok) {

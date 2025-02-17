@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\IaAgent;
-
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+
 
 class IA extends Controller
 {
-    protected $agent;
+    protected $agent,$recuperarContexto;
 
 
     public function index(){
@@ -22,8 +24,54 @@ class IA extends Controller
     }
 
 
-    public function queryIA(Request $request)
-    {
+    function preguntarIA(Request $request) {
+        $usuario = User::first();
+        $pregunta = $request->message;
+
+        if (!$this->agent->tieneHistorial($usuario)) {
+            $respuesta = $this->agent->enviarPreguntaAI(["role" => "user", "content" => $pregunta]);
+            $respuesta = $respuesta['choices'][0]['message']['content'];
+
+            $this->agent->guardarMensaje($usuario, $pregunta, $respuesta);
+            return $respuesta;
+        }
+
+        $contexto = $this->agent->recuperarContexto($usuario);
+        if ($contexto->count() > 10) {
+            $resumen = $this->agent->resumirConversacion($contexto);
+            $historial = [
+                ["role" => "system", "content" => "Resumen de la conversación: " . $resumen],
+                ["role" => "user", "content" => $pregunta]
+            ];
+        } else {
+            // Construir el historial correctamente
+            $historial = [];
+            foreach ($contexto as $mensaje) {
+                $historial[] = ["role" => "user", "content" => $mensaje->mensaje];
+                $historial[] = ["role" => "assistant", "content" => $mensaje->respuesta];
+            }
+        }
+
+        // Agregamos la pregunta actual
+        $historial[] = ["role" => "user", "content" => $pregunta];
+
+        // Enviamos la pregunta junto con todo el historial
+        $respuesta = $this->agent->enviarPreguntaAI($historial[count($historial)-1], $historial);
+        $respuesta = $respuesta['choices'][0]['message']['content'];
+
+        // Guardamos el nuevo mensaje y respuesta
+        $this->agent->guardarMensaje($usuario, $pregunta, $respuesta);
+
+
+        return $respuesta;
+    }
+
+
+
+
+
+
+    public function queryIA(Request $request){
         $message = $request->input('message');
 
         // 1️⃣ Llamar a la IA para analizar el mensaje
@@ -53,5 +101,5 @@ class IA extends Controller
         ]);
     }
 
-// $response = $this->agent->ask($request->message);
+
 }
