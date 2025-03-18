@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 
 class IA extends Controller
 {
-    protected $agent,$recuperarContexto;
+    protected $agent;
 
 
     public function index(){
@@ -21,6 +21,9 @@ class IA extends Controller
 
     public function __construct(IaAgent $agent){
         $this->agent = $agent;
+    }
+    public function js(){
+        return view('js');
     }
 
 

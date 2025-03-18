@@ -40,7 +40,6 @@ class IaAgent
     }
 
 
-    // 📌 Guardar mensaje en la base de datos
     function guardarMensaje($usuario, $pregunta, $respuesta) {
         Conversacion::create([
             'usuario_id' => $usuario->id,
@@ -49,22 +48,19 @@ class IaAgent
         ]);
     }
 
-    // 📌 Recuperar el contexto de la conversación
     function recuperarContexto($usuario) {
         return Conversacion::where('usuario_id', $usuario->id)
-            ->orderBy('created_at', 'desc') // Tomamos los más recientes primero
-            ->take(10) // Últimos 10 mensajes
+            ->orderBy('created_at', 'desc')
+            ->take(10)
             ->get()
-            ->sortBy('created_at'); // Luego los ordenamos en orden correcto
+            ->sortBy('created_at');
     }
 
 
-    // 📌 Verificar si el usuario tiene historial
     function tieneHistorial($usuario) {
         return Conversacion::where('usuario_id', $usuario->id)->exists();
     }
 
-    // 📌 Resumir la conversación si es demasiado grande
     function resumirConversacion($contexto) {
         $resumen = "Aquí está el resumen de la conversación previa:\n";
 
@@ -73,7 +69,6 @@ class IaAgent
             $resumen .= "IA: {$m->respuesta}\n";
         }
 
-        // Si es muy largo, podemos recortarlo más
         return substr($resumen, 0, 1000); // Recortar a 1000 caracteres máximo
     }
 

@@ -13,6 +13,7 @@ Route::get('/alumnos',[AlumnoController::class,'index'])->name('alumnos');
 Route::post('/alumnos',[AlumnoController::class,'store'])->name('alumnos.store');
 Route::delete('/alumnos/{id}',[AlumnoController::class,'destroy'])->name('alumnos.destroy');
 
-Route::get('/ia', [IA::class, 'index'])->name('ia.index');  // Cambiado de /user a /ia
+Route::get('/ia', [IA::class, 'index'])->name('ia.index');
 Route::post('/ia', [IA::class, 'preguntarIA'])->name('preguntarIA');
+Route::get('js',[IA::class,'js'])->name('js');
 
